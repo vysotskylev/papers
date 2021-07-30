@@ -1,0 +1,750 @@
+\documentclass[3p]{cmmp}%{elsarticle}
+%https://tex.stackexchange.com/questions/35712/modify-footer-used-by-elsarticle-cls
+\makeatletter
+\def\ps@pprintTitle{%
+ \let\@oddhead\@empty
+ \let\@evenhead\@empty
+ \def\@oddfoot{\centerline{\thepage}}%
+ \let\@evenfoot\@oddfoot}
+\makeatother
+
+%\usepackage{ecrc}
+%\volume{00}
+%\firstpage{1}
+%\journalname{Signal Processing}
+%\runauth{P.V.~Kharyuk et al}
+%\jid{sigpro}
+%\jnltitlelogo{Signal Processing}
+
+
+% http://pleiades.online/en/journal/commat/authors-instructions/
+
+\biboptions{longnamesfirst,semicolon,sort&compress}%,longtitle}%,times}
+
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage[unicode=true,plainpages=false]{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+\hypersetup{colorlinks=true,linkcolor=magenta,anchorcolor=magenta,urlcolor=red,citecolor=green}
+\usepackage{amsthm}
+\usepackage{amsmath}
+
+\usepackage{float}
+
+\usepackage{multirow}
+
+\DeclareMathOperator{\rank}{rank}
+
+\newtheorem{theorem}{Теорема}
+\newtheorem{proposition}{Утверждение}
+\newtheorem{lemma}{Лемма}
+\newtheorem{corollary}{Следствие}
+\newtheorem*{corollary*}{Следствие}
+\newtheorem*{note*}{Замечание}
+
+%\usepackage{mytodonotes}
+
+% Geometry
+%\usepackage[a4paper]{geometry}
+
+% biblio
+
+%\usepackage[nobreak]{cite}
+%\makeatletter
+%\renewcommand{\@biblabel}[1]{#1.} 
+%\makeatother
+%\renewcommand\citepunct{;~ }
+%\usepackage[numbers]{natbib}
+%\setlength{\bibsep}{0pt}
+%\bibliographystyle{unsrt}
+%\bibliography{pub}
+
+%\usepackage{acro}
+%\acsetup{first-style=short}
+%\input{abbrev}
+
+% fbox
+\setlength{\fboxsep}{0.5 pt}
+
+% remoe hrules for abstract
+\usepackage{xpatch}
+
+
+
+%double spacing
+%\usepackage[nodisplayskipstretch]{setspace}
+%\doublespacing
+
+% eqiation numbering: 3.4, 5.6 etc
+\numberwithin{equation}{section}
+
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{О ТТ-рангах приближённых тензоризаций некоторых гладких функций}
+%\tnotetext[t1]{This document is a collaborative effort.}
+%\tnotetext[t2]{The second title footnote which is a longer
+%longer than the first one and with an intention to fill
+%in up more than one line while formatting.}
+
+\author[inm,cmcmsu]{Высоцкий Л.И.}%\fnref{fn1}}
+\ead{vysotskylev@yandex.ru}
+
+\address[inm]{Институт вычислительной математики им. Г.И. Марчука
+Российской академии наук, ул. Губкина, 8, Москва, Россия, 119333}
+\address[cmcmsu]{Факультет вычислительной математики и кибернетики,
+Московский государственный университет имени М.В. Ломоносова,
+Ленинские горы, 1, стр.52, ГСП-1, Москва, Россия, 119991}
+
+\begin{abstract}
+В данной работе исследуются ``тензоризации'' функций, т.е. тензоры с элементами $A(i_1, \dots, i_d) = f(x(i_1, \dots, i_d))$, где $f(x)$ "--- некоторая функция, заданная на отрезке, а $\{x(i_1, \dots, i_d)\}$ "--- сетка на этом отрезке.
+Для таких тензоров ставится задача их приближения тензорами, допускающими ТТ- (Tensor Train) разложение с малыми ТТ-рангами.
+Для класса функций, являющихся следами аналитических в некоторых эллипсах на комплексной плоскости функций комплексного переменного, получены верхние и нижние оценки ТТ-рангов оптимальных приближений.
+Указанные оценки применены к тензоризациям полиномиальных функций, существенно улучшая известную верхнюю границу.
+\end{abstract}
+%\xpatchcmd{\printMaketitle}{\hrule}{}{}{}% remove first horizontal rule
+%\xpatchcmd{\printMaketitle}{\hrule}{}{}{}% remoce second horizonral rule
+\begin{keyword}
+ТТ-разложение \sep tensor train \sep ТТ-ранги \sep тензоризации функций
+\sep приближения
+\end{keyword}
+\end{frontmatter}
+
+%\textbf{Highlights}
+%\input{highlights.tex}
+
+
+% Theorems
+%\newtheorem{thm}{Theorem}
+%\newtheorem{lem}[thm]{Lemma}
+%\newdefinition{rmk}{Remark}
+%\newproof{pf}{Proof}
+%\newproof{pot}{Proof of Theorem \ref{thm2}}
+
+% Lists
+%\begin{enumerate}[1.] / [a)] [(i)]
+%\begin{enumerate}[Step 1.]
+%\item This is the first step of the example list.
+%\item Obviocorollaryy this is the second step.
+%\item The final step to wind up this example.
+%\end{enumerate}
+
+%\
+
+
+\section{Введение}
+\label{sec-1}
+
+	Относительно недавние успехи по преодолению ``проклятия размерности'' позволяют оперировать с дискретизациями функций на очень густых сетках. 
+Например (в духе работ~\cite{Oseledets2013,Grasedyck2010,Khoromskij2011,Tyrtyshnikov2003,Vysotsky2020}), заданную на отрезке $[L,R]$ функцию $f(x)$ можно дискретизировать, то есть превратить в вектор c элементами $f(x(i))$, где $\{x(i)\}_{i = 0}^{N-1}$ "--- произвольная сетка на $[L, R]$.
+%
+Если $N = n_1 \times \dots \times n_d$, то 
+полученный вектор можно рассматривать~\cite{Oseledets2009} как тензор (многомерный массив) размеров $n_1 \times \dots \times n_d$ с элементами
+\[
+A(i_1, \dots, i_d) = f\left(x(i_1 N_1 + \dots + i_d N_d)\right), ~N_k = n_{k+1}\dots n_d,~ i_k \in \{0, \dots, n_k-1\}.
+\]
+Тензор $A$ будем называть \emph{тензоризацией} функции $f$ на сетке $\{x(i)\}$.
+Этот тензор на практике часто допускает приближение другим тензором $B$, имеющим малопараметрическое представление.
+К примеру, можно использовать ТТ-разложение~\cite{Oseledets2011,Grasedyck2010} (tensor train, тензорный поезд):
+\begin{equation}\label{eq:TT}
+B(i_1, \dots, i_d) = \sum_{\alpha_1, \dots, \alpha_{d-1}}H_1(i_1,\alpha_1) \dots H_k(\alpha_{k-1}, i_{k}, \alpha_{k}) \dots H_d(\alpha_{d-1}, i_d),
+\end{equation}
+где $H_k$ имеет размеры $r_{k-1} \times n_k \times r_{k}$, а индекс суммирования $\alpha_k$ пробегает значения от $1$ до $r_k$.
+Числа $r_k$ называются ТТ-рангами представления (\ref{eq:TT}), причём для единообразия определения тензоров $H_k$ считается, что $r_0=r_d=1$.
+
+Величины ТТ-рангов играют ключевую роль для применимости ТТ-разложения, ведь требуемая для хранения тензоров $H_k$ память и сложность распространённых операций над тензорами в этом формате растёт пропорционально полиномам малой степени от $r_k$~\cite{Oseledets2011}.
+Поэтому представляется интересным исследовать, насколько малы могут быть ТТ-ранги приближений тензоризаций функций.
+
+Для некоторых классов функций известны компактные представления для тензоризаций, например, для экспоненты, синуса и некоторых других~\cite{Khoromskij2011,Oseledets2013}.
+Для тензоризации полинома степени $n$ на равномерной сетке известно~\cite{Khoromskij2011,Grasedyck2010}, что все её ТТ-ранги ограничены $n+1$.
+В~\cite{Grasedyck2010} было показано, что ТТ-ранги приближений тензоризаций т.н. \emph{асимптотически гладких} (т.е. бесконечно дифференцируемых с ``не слишком быстро'' растущими при приближении к сингулярностям производными) функций ограничены числом, растущим при уменьшении требуемой погрешности $\varepsilon$ как $-\log_2(\varepsilon)$.
+В~\cite{Vysotsky2020} были получены оценки ТТ-рангов приближений тензоризаций полиномов на равномерных сетках, улучшающие известную оценку $n+1$.
+
+В данной работе для тензоризаций вещественнозначных функций, являющихся следами аналитических в 
+некотором эллипсе функций комплексного переменного, доказаны верхние и нижние оценки ТТ-рангов приближений.
+Полученные оценки были применены к тензоризациям полиномов, существенно улучшив известные результаты: вместо $O(\sqrt[3]{n})$ из~\cite{Vysotsky2020} доказана оценка $O(\ln n)$.
+	
+\section{Необходимые определения}
+\emph{Матрицами развёртки} тензора $A \in \mathbb{R}^{n_1 \times \dots \times n_d}$ называются матрицы
+\[
+A_k \in \mathbb{R}^{(n_1\dots n_k) \times (n_{k+1}\dots n_d)},~A_k(i_1, \dots, i_k; i_{k+1}, \dots, i_d) = A(i_1, \dots, i_d),
+\]
+где группы индексов до и после точки с запятой образуют т.н. \emph{мультииндексы}, отождествляемые со своим номером (нумерация с нуля) в лексикографическом (словарном) порядке.
+
+Для тензора $A \in \mathbb{R}^{n_1 \times \dots \times n_d}$ определим нормы $\|A\|_{\infty} = \max{|A(i_1, \dots, i_d)|}$ и $\|A\|_F = \sqrt{\sum (A(i_1, \dots, i_d))^2}$.
+
+В основном мы будем рассматривать ``кубические'' тензоризации на равномерных сетках, то есть тензоры, все размеры которого равны одному и тому же числу $b$, а элементы заданы значениями функции $f(x)$ в равноудалённых узлах.
+Такие $d$-мерные тензоризации с шагом $(R-L)b^{-d}$ на отрезке $[L, R]$ будем обозначать $T_{b, d, [L,R]}(f)$.
+
+Для ТТ-разложения вида~(\ref{eq:TT}) $d$-мерного тензора $B \in \mathbb{R}^{b\times\dots\times b}$ определим $\mathcal{R}(H_1, \dots, H_d)$ как максимальный из его ТТ-рангов.
+Далее определим
+$\mathcal{R}(B)$ по следующей формуле:
+\[
+\mathcal{R}(B) := \min_{\substack{(H_1,\dots,H_d) \text{"---} \\ \text{ТТ-разложение }B}}\mathcal{R}(H_1, \dots, H_d).
+\]
+Для оценки ТТ-рангов наилучших приближений нам понадобится функция
+\[
+\mathcal{R}_\varepsilon(A) := \min_{B:\|B - A\|_F \leq \varepsilon} \mathcal{R}(B).
+\]	
+
+
+Эллипс на комплексной плоскости с центром в нуле и осями, параллельными осям координат, чьи полуоси равны $0.5(\rho + \rho^{-1})$ и $0.5 (\rho - \rho^{-1})$ для некоторого $\rho > 1$, будем называть эллипсом Бернштейна и обозначать $\Gamma_{\rho}$. 
+Также эллипс Бернштейна можно рассматривать (см.~\cite{MNA}) как образ окружности $\{\rho e^{i \varphi}: \varphi \in [0, 2\pi) \}$ под действием отображения Жуковского $w \to 0.5(w + w^{-1})$. 
+Такой же эллипс, но с центром в точке $z \in \mathbb{C}$, будем обозначать $\Gamma_{\rho}(z)$.
+
+\emph{Чебышёвской сеткой} на $[-1,1]$ с числом узлов $n$ будем называть упорядоченное множество точек $\{x_0, \dots, x_{n-1}\}$, где $x_j = \cos(\pi/(2n) + \pi j/n)$.
+Известно~\cite{MNA}, что числа $x_j$ являются корнями \emph{полинома Чебышёва} степени $n$, то есть $T_n(x) = \cos(\arccos (nx))$.
+
+
+Круг радиуса $r$ с центром в точке $z$ на комплексной плоскости будем обозначать $U(r, z)$.
+
+\section{Верхние оценки}
+\begin{lemma}\label{lm:lagrange}
+	Пусть $f(x)$ --- след аналитической внутри эллипса Бернштейна $\Gamma_{\rho}$, $\rho > 1$,  функции $f(z)$, причём $|f(z)| \leq M$  на $\Gamma_{\rho}$.
+	Пусть также $P_n(x)$ --- полином Лагранжа степени $n$ для $f(x)$ на Чебышёвской сетке на $[-1,1]$ с $n + 1$ узлом $\{x_0, \dots, x_n\}$.  
+	Тогда для $x \in [-1,1]$
+	\[|f(x)-P_n(x)| \leq \frac{M}{\rho^{n+1}-\rho^{-n-1}}\cdot \frac{\rho + \rho^{-1}}{\frac{1}{2}(\rho + \rho^{-1}-1 )}.\]
+\end{lemma}
+\begin{proof}
+	Зафиксируем произвольное $x \in [-1,1]\setminus\{x_0, \dots, x_n\}$. 
+	Далее рассмотрим функцию
+	\[F(z) := \frac{f(z)}{(z-x)\prod_{j=0}^n(z-x_j)}\]
+	и, применяя теорему о вычетах и домножая на $\Pi_j(x-x_j)$ (то есть рассуждая аналогично~\cite[Теорема~13.6]{MNA}), придём к представлению
+	\[\prod_{j = 0}^n (x-x_j)\int_{\Gamma_{\rho}}F(z)dz = 2\pi i \Biggl( f(x) - \underbrace{\sum_{\ell=0}^n f(x_\ell) \frac{\prod_{j \neq \ell}(x-x_j)}{\prod_{j \neq \ell}(x_\ell - x_j)}}_{P_n(x)} \Biggr).\]
+	Так как $x_j$ суть в точности корни полинома Чебышёва $T_{n+1}(x)$ степени $n+1$, то можно записать 
+	\[
+	T_{n+1}(x)\int_{\Gamma_{\rho}}\frac{f(z)dz}{(z-x)T_{n+1}(z)} = 2\pi i (f(x) - P_n(x)).
+	\]
+	Используя доказанное в~\cite[Теорема~13.6]{MNA} для $z \in \Gamma_{\rho}$ неравенство $|T_{n+1}(z)| \geq 0.5(\rho^{n+1}-\rho^{-n-1})$, а также очевидное для $x\in[-1,1]$ неравенство $|T_{n+1}(x)| \leq 1$, получаем, что при $x \in [-1,1]$
+	\begin{align*}
+	\left|f(x)-P_n(x)\right| 
+	&\leq \frac{1}{2\pi}|T_{n+1}(x)| \cdot \left|\int_{\Gamma_{\rho}} \frac{f(z)dz}{(z-x)T_{n+1}(z)}\right| 
+	\leq \frac{1}{2\pi} \int_{\Gamma_{\rho}} \frac{M|dz|}{|z-x|\cdot |T_{n+1}(z)|} \le\\
+	&\leq \frac{M}{2\pi}\cdot \frac{2}{\rho^{n+1} - {\rho^{-n-1}}} \int_{\Gamma_{\rho}} \frac{|dz|}{|z-x|} \leq \frac{M}{\pi(\rho^{n+1}-\rho^{-n-1})}\cdot \frac{|\Gamma_{\rho}|}{\min_{\,z\in\Gamma_\rho}|z-x|}.
+	\end{align*}
+	Для оценки длины эллипса $\Gamma_\rho$ воспользуемся упомянутым фактом, что первый является образом окружности $S_\rho := \{\rho e^{i\varphi}:\varphi \in [0, 2\pi)\}$ под действием отображения $w \to 0.5(w + w^{-1})$:
+	\[|\Gamma_{\rho}| 
+	= \int_{\Gamma_{\rho}}|dz|
+	= \int_{S_\rho} \left|\frac{1}{2}dw - \frac{1}{2}w^{-2}dw\right|
+	= \int_0^{2	\pi}\frac{1}{2}\left|1-(\rho e^{i\varphi})^{-2}\right| \rho d \varphi \leq \frac{1}{2}(1+\rho^{-2})\rho \cdot 2\pi.\]
+	%
+	Далее вычислим $\min|z-x|^2$ для $z \in \Gamma_{\rho}$ и $x \in [-1,1]$. Обозначим за $r_1$ и $r_2$ большую и меньшую полуоси эллипса $\Gamma_\rho$ соответственно. Тогда точки этого эллипса параметризуются углом $\varphi$: $z = r_1\cos \varphi + ir_2\sin \varphi$.
+	Преобразуем минимизируемое выражение:
+	%
+	\begin{align}\label{eq:z-x}
+	|z-x|^2 = (r_1\cos \varphi - x)^2 + (r_2\sin\varphi)^2 = (r_1^2-r_2^2)\cos ^2 \varphi - 2r_1x \cos \varphi + x^2 + r_2^2.
+	\end{align}
+	%
+	В силу симметрии достаточно рассмотреть $x \ge 0$.
+	При фиксированном $x$ выражение (\ref{eq:z-x}) "--- это квадратный трёхчлен относительно $\cos \varphi$, причём вершина соответствующей параболы имеет абсциссу $r_1x/(r_1^2-r_2^2) = r_1x$.
+	При $r_1x \le 1$ минимум по $\varphi$ достигается при $\cos \varphi = r_1x$ и равен $r_2^2$. 
+	При $r_1x > 1$ минимум достигается при $\cos\varphi = 1$ и равен $(r_1-x)^2$, причём это выражение достигает минимума по $x$ при $x = 1$.
+	Так как $r_1 - 1 < r_2$, то и $\min|z-x| = r_1 - 1 = 0.5(\rho + \rho^{-1})-1$.
+	%
+	Итого, 
+	\[
+	|f(x)-P_n(x)| 
+	\leq \frac{M \rho \pi (1+\rho^{-2})}{\pi (\rho^{n+1} - \rho^{-n-1})(\frac{1}{2}(\rho+\rho^{-1})-1)}
+	= \frac{M}{\rho^{n+1} - \rho^{-n-1}} \frac{\rho+\rho^{-1}}{\frac{1}{2}(\rho+\rho^{-1})-1}.
+	\]
+\end{proof}
+
+\begin{theorem}\label{thm:upper-1}
+	Пусть $f: [L,R]\rightarrow \mathbb{R}$ является следом аналитической в круге с диаметром $[L,R]$ функции $f(z)$, причём $|f(z)| \leq M$ для всех $z$ из этого круга. 
+	
+	Фиксируем произвольное $\varepsilon > 0$. Тогда для каждой матрицы развёртки $A_k \in \mathbb{R}^{b^k \times b^{d-k}}$ тензора $T_{b,d,[L,R]}(f)$ и любого натурального $\mu \in [1, b^k - 1]$  существует матрица $B_k \in \mathbb{R}^{b^k \times b^{d-k}}$ такая, что
+	\[
+	\rank B_k \leq 2\mu + s + 1 \text{ и } \| A_k - B_k \|_{\infty} \leq \varepsilon,
+	\]
+	где $s = \lfloor \log_{\rho} (3M /\varepsilon +1)\rfloor, $ $\rho = 2\mu + 1+2 \sqrt{{\mu}^2+\mu}.$
+\end{theorem}
+\begin{proof}
+	Обозначим $h$ шаг дискретизации: $h := (R-L)b^{-d}$.
+	Строка матрицы $A_k$ с индексом $j$ соответствует отрезку $\left[L+jh, L+ (j+1)h\right]$.
+	Рассмотрим функцию
+	\[
+	g_j(y) = f\Bigl(L+ jh + \frac{1+ y}{2}h \Bigr),~ y \in [-1,1],
+	\]
+	а также соответствующую функцию комплексного аргумента $g_j(w)$, 
+	$ w \in U\left(\left(\rho + \rho^{-1}\right)/2, 0\right)$.
+	
+	Отображение $w \mapsto \alpha + \beta w$ переводит круг $U((\rho + \rho^{-1})/2, 0)$ в $U(\beta(\rho~+~\rho^{-1})/2,~\alpha)$.
+	В нашем случае $\alpha = L + jh + h/2$, $\beta = h/2$.
+	Покажем, что при $j = \mu, \mu + 1, \dots, b^k-\mu-1$ круг $U(\beta(\rho + \rho^{-1})/2, \alpha)$ лежит внутри круга с диаметром $[L,R]$, то есть 
+	\[
+	\begin{cases}
+	L+jh + \frac{h}{2} - \frac{h}{4}\left(\rho+ \rho^{-1}\right) \geq L, \\
+	L+jh + \frac{h}{2} + \frac{h}{4}\left(\rho+ \rho^{-1}\right) \leq R.
+	\end{cases}
+	\]
+	Действительно, для заданного в условии Теоремы $\rho$ верно равенство $\rho + \rho^{-1} = 4\mu + 2$, поэтому указанная пара условий переписывается как 
+	\[
+	\begin{cases}
+		(j-\mu)h \geq 0, \\
+	L+(j+\mu+1)h \leq R,
+
+	\end{cases}
+	\Leftrightarrow
+	~~
+	\begin{cases}
+	j \geq \mu, \\
+	j \leq b^k - \mu - 1.
+	\end{cases}
+	\]
+	
+	Внутри круга с диаметром $[L, R]$ по условию выполнено неравенство $|f(z)| \leq M$, поэтому и $|g_j(w)| \leq M$ для $w \in U((\rho + \rho^{-1})/2, 0)$, а значит, и для $w \in \Gamma_\rho$.
+	Поэтому из Леммы \ref{lm:lagrange} следует, что для полинома Лагранжа $\widehat{P}_{s,j}(y)$ степени $s$ на Чебышёвской сетке для $g(y)$ верно неравенство
+	\begin{align}\label{eq:interp-error}
+	\Bigl|g_j(y)-\widehat{P}_{s,j}(y)\Bigr|
+	&\le
+	\frac{\rho + \rho^{-1}}{\frac{1}{2}(\rho + \rho^{-1})-1}\frac{M}{\rho^{s+1} - \rho^{-s-1}}
+	=
+	\frac{4\mu + 2}{2\mu} \frac{M}{\rho^{s+1} - \rho^{-s-1}} 
+	\le
+	\frac{3M}{\rho^{s+1} - 1}
+	\le
+	\frac{3M}{3M/\varepsilon + 1 - 1} = \varepsilon.
+	\end{align}
+	
+	Обозначим $P_{s,j}(x) := \widehat{P}_{s,j}\left(\frac{2}{h}(x-L-jh)-1\right)$. 
+	Из неравенства~(\ref{eq:interp-error}) получаем, что $|f(x)-P_{s,j}(x)| \leq \varepsilon$ на отрезке $\left[L+jh, L+ (j+1)h\right]$ для $j = \mu, \mu + 1, \dots, b^k - \mu - 1$.
+	Поэтому строки $a_j^\top$ с этими индексами приблизим строками
+	\[
+	\vec{P}_{s,j}^\top := \left[P_{s,j}\left(L + h\left(j + \ell b^{k-d}\right)\right)\right]_{\ell=0}^{b^{d-k}-1}.
+	\]
+	Так как степень полиномов $P_{s,j}(x)$ не превосходит $s$, все строки $\vec{P}_{s,j}^\top$  лежат в линейной оболочке векторов $p_0, \dots, p_s \in \mathbb{R}^{d-k}$, $p_t(\ell) = \ell^t$.
+	
+	Строки $a_j^\top$ матрицы $A_k$ с индексами $j \in \{0, \dots, \mu - 1\}\cup \{b^k - \mu, \dots, b^k - 1\}$ ``приблизим'' ими самими, то есть матрицу $B_k$ построим в виде 
+	\[
+	\left[a_0^{\top}, \dots, a_{\mu-1}^{\top}, \vec{P}_{s,\mu}^{\top}, \dots, \vec{P}_{s, b^k-\mu-1}^{\top}, a_{b^k-\mu}^{\top}, \dots, a_{b^k-1}^{\top}\right]^{\top}.
+	\]
+	Очевидно, $\rank B_k \leq 2\mu + s+1$ и $\|A_k - B_k\|_{\infty} \leq \varepsilon$.
+\end{proof}
+\begin{corollary}\label{cor:upper}
+	В условиях Теоремы~\ref{thm:upper-1} для любого $\widehat{\varepsilon} > 0$ выполнено
+	\[
+	\mathcal{R}_{\widehat\varepsilon}(T_{b,d,[L,R]}(f)) \leq \widehat s + 3, \text{ где }
+	\]
+	\[
+	\widehat s = \left\lfloor \log_{\rho} \left(3Mb^{\frac{d}{2}}\sqrt{d-1}\widehat\varepsilon^{\,-1} +1\right)\right\rfloor,~~\rho = 3+2 \sqrt{2},
+	\]
+\end{corollary}
+\begin{proof}
+	Положим в Теореме~\ref{thm:upper-1} $\mu = 1$ (чтобы удовлетворить условию $\mu \in [1, b^k-1]$ для всех $k=1,\dots,d-1$) и
+	\[
+	\varepsilon = \frac{\widehat\varepsilon}{b^{d/2}\sqrt{d-1}}
+	\]
+	и рассмотрим приближения $B_k$ к матрицам развёртки $A_k$ со свойствами  $\rank B_k \leq \widehat s+3$ и $\|A_k - B_k\|_{\infty} \leq \varepsilon$. 
+	Из последнего неравенства следует, что $\|A_k - B_k\|_F \leq \varepsilon b^{d/2}$.
+	
+	Теорема~2.2 из~\cite{Oseledets2010} гарантирует существование тензора $\widehat B$ с ТТ-рангами $r_k$, приближающего тензор $A$ в норме Фробениуса с точностью
+	\[
+	\sqrt{\sum_{k=1}^{d-1} \varepsilon_k^2},
+	\]
+	где $r_k$ суть $\varepsilon_k$-ранги матриц развёртки $A_k$.
+	Положим $\varepsilon_k := \varepsilon b^{d/2}$, тогда $r_k \leq \rank B_k \leq \widehat s + 3$ и при этом
+	\[
+	\|A - \widehat B\|_F \leq \sqrt{d-1}\varepsilon b^{d/2} = \widehat \varepsilon.
+	\]
+\end{proof}
+\begin{theorem}
+	Пусть $\widehat{\Gamma}$ "--- образ эллипса $\Gamma_{\rho}$ под действием линейного отображения $\xi(w) := \frac{R+L}{2}+\frac{R-L}{2}w$, а $f(z)$ "--- аналитическая внутри $\widehat{\Gamma}$ функция, для которой $|f(z)| \leq M$ для $z \in \widehat{\Gamma}$ и имеющая вещественнозначный след на $[L, R]$.
+	
+	Тогда для произвольного $\varepsilon > 0$ и натуральных $b$ и $d$ существует тензор $B$ такой, что
+	\[
+	\mathcal{R}(B) \leq \lfloor \log_{\rho} \left(3M/\varepsilon+1\right)\rfloor,~\|T_{b,d,[L,R]}(f) - B\|_{\infty} \leq \varepsilon.
+	\]
+\end{theorem}
+\begin{proof}
+	Приблизим $(f \circ \xi)(x)$ полиномом Лагранжа $\widehat{P}_s(x)$ степени $s$ на Чебышёвской сетке на $[-1,1]$.
+	$(f \circ \xi)(x)$ --- след аналитической в $\Gamma_{\rho}$ функции $(f \circ \xi)(z)$.
+	Аналогично доказательству Теоремы~\ref{thm:upper-1} можно показать, что для параметра $s$ из условия выполнено неравенство
+	\begin{align*}
+	\left|(f \circ \xi)(x) - \widehat{P}_s(x)\right| &\leq \varepsilon~~\forall x \in [-1,1]
+	\Rightarrow \\
+	\left|(f \circ \xi)\left(\xi^{-1}(y)\right) - \widehat{P}_s\left(\xi^{-1}(y)\right)\right| &\leq \varepsilon~~\forall y \in [L,R]
+	\Rightarrow \\
+	\left|f(y)-\left(\widehat{P}_s \circ \xi^{-1}\right)(y)\right| &\leq \varepsilon~~\forall y \in [L, R].
+	\end{align*}
+	$\bigl(\widehat{P}_s \circ \xi^{-1}\bigr)(y)$ есть полином степени не более $s$, поэтому согласно~~\cite{Khoromskij2011,Grasedyck2010} его тензоризация $B$ допускает ТТ-разложение с ТТ-рангами, не превосходящими $s + 1$.
+\end{proof}
+\section{Нижние оценки}
+В данном разделе будет рассмотрен пример функции $f(x)$, являющейся следом аналитической в $\mathbb{C}$ функции.
+Для приближённых ТТ-рангов тензоризации этой функции будет доказана нижняя оценка (Теорема~\ref{thm:lower}).
+
+Зафиксируем натуральные $b \ge 2$, $d \ge 2$ и $k \ge d/3$. Определим $f(z) := \sin (2\pi b^{2k}z^2)$, $z \in \mathbb{C}$, и обозначим $f(x)$ её (вещественнозначный) след на $\mathbb{R}$.
+Обозначим $A := T_{b,d,[0,1]}(f)$.
+%
+Введём в рассмотрение функции
+\[
+f_s(\xi) := f\left(\left(s + \frac{\xi}{2\pi}\right) b^{-k}\right),~~\xi \in [0,2\pi],~~s \in \{ 0, \dots, b^k-1\}.
+\]
+Строка матрицы развёртки $A_k$ с индексом $s$ есть дискретизация функции $f_s(\xi)$ на равномерной сетке на $[0, 2\pi]$.
+Для всех $s, t \in \{0, \dots, b^{k}-1\}$ определим интегралы
+\[
+d_{s,t} := \frac{1}{\pi}\int_{0}^{2\pi}f_s(\xi)f_t(\xi)d\xi.
+\]
+Для тех же $s,t$ введём величины (здесь $a_{s,i}$ --- элементы матрицы $A_k$)
+\begin{equation}\label{eq:d-hat}
+\widehat{d}_{s,t} := \frac{2\pi}{b^{d-k}}\frac{1}{\pi}\sum_{i=0}^{b^{d-k}-1}a_{s,i}a_{t,i}.
+\end{equation}
+Матрицу из элементов $\widehat{d}_{s,t}$ обозначим $\widehat{D}$.
+\begin{lemma}\label{lm:d}
+	Для всех  $s, t \in \{0, \dots, b^{k}-1\}$ верно неравенство 
+	\[
+	|d_{s,t} - \delta_{s,t}| \leq \frac{2}{(s+t)^2},
+	\]
+	где $\delta_{s,t}$ --- символ Кронекера.
+\end{lemma}
+\begin{proof}
+	Преобразуем выражения для $f_s(\xi)$:
+	\[
+	f_s(\xi)
+	=
+	\sin \left(2\pi b^{2k}\left(s^2 + \frac{s\xi}{\pi}+\frac{\xi^2}{4\pi^2}\right)b^{-2k}\right)
+	=
+	\sin \left(2s\xi+\frac{1}{2\pi}\xi^2\right).
+	\]
+	Поэтому
+	\begin{align}
+	d_{s,t}
+	&=
+	\frac{1}{\pi} \int_{0}^{2\pi} f_s(\xi) \cdot f_t(\xi) d\xi 
+	=
+	\frac{1}{2\pi} \int_{0}^{2\pi}\cos \left(2(s-t)\xi\right) - \cos \left(2(s+t)\xi + \frac{1}{\pi}\xi^2\right) d\xi	
+	= \nonumber \\ &=
+	\label{eq:dst}
+	\frac{1}{2\pi}\cdot
+	\begin{cases}
+	2\pi - \int_0^{2\pi} \cos\left(4s\xi+\frac{1}{\pi}\xi^2\right)d\xi, & \text{если $s=t$;} \\
+	\phantom{2\pi} - \int_0^{2\pi} \cos\left(2(s+t)\xi+\frac{1}{\pi}\xi^2\right)d\xi, & \text{если $s\neq t$.} \\
+	\end{cases}
+	\end{align}
+	%
+	Обозначим $\beta := 1/\pi$, $p := 2(s+t)$ и исследуем интеграл $\int_0^{2\pi}e^{ip\xi + i\beta\xi^2}d\xi$.
+	\begin{align*}
+	\int_0^{2\pi}e^{ip\xi + i\beta\xi^2}d\xi
+	&=
+	\int_0^{2\pi} \frac{1}{ip}e^{i\beta\xi^2}d e^{ip\xi} 
+	=
+	\frac{1}{ip} \left(e^{i\beta\xi^2}e^{ip\xi}\Big|_0^{2\pi} - \int_0^{2\pi}i\beta 2\xi e^{ip\xi} e^{i\beta\xi^2}d\xi\right).
+	\end{align*}
+	%
+	Первый член в скобках равен $0$, так как $e^{i\beta(2\pi)^2} = e^{i4\pi} = 1 = e^{ip2\pi}$.
+	Повторяя интегрирование по частям, получим
+	\begin{align*}
+	\int_0^{2\pi}e^{ip\xi + i\beta\xi^2}d\xi 
+	&= 
+	\frac{-2i\beta}{ip} \int_0^{2\pi}\xi e^{ip\xi}e^{i\beta \xi^2}d\xi
+	=
+	\frac{-2\beta}{p}\cdot\frac{1}{ip} \int_{0}^{2\pi} \xi e^{i\beta\xi^2}d e^{ip\xi}
+	= \\ &=
+	\frac{-2\beta}{i p^2} \left( \xi e^{i\beta \xi^2}e^{ip\xi} \Big|_0^{2\pi} - \int_0^{2\pi}e^{ip\xi}e^{i\beta \xi^2}\left( 1+i\beta 2\xi^2\right)d\xi \right)
+	= \\ &=
+	\frac{-2\beta}{ip^2}\left(2\pi -  \int_0^{2\pi}e^{ip\xi}e^{i\beta \xi^2}\left( 1+i\beta 2\xi^2\right)d\xi\right).
+	\end{align*}
+	%
+	Взяв вещественную часть от обеих частей полученного равенства, получим
+	\[
+	\int_0^{2\pi} \cos(p\xi + \beta\xi^2) d\xi = -\frac{2\beta}{p^2}\mathrm{Im} \int_0^{2\pi}e^{ip\xi}e^{i\beta \xi^2}\left( 1+i\beta 2\xi^2\right)d\xi.
+	\]
+	%
+	Поэтому
+	\[
+	\left|\int_0^{2\pi} \cos(p\xi + \beta\xi^2) d\xi\right|
+	\le
+	\frac{2\beta}{p^2}\int_0^{2\pi}1 + 2\beta\xi^2d\xi
+	=
+	\frac{4\beta \pi}{p^2} + \frac{4\beta^2}{3p^2}8\pi^3 = \frac{1}{p^2}\left(4 + \frac{32\pi}{3}\right).
+	\]
+	%
+	Отсюда и из (\ref{eq:dst}) следует, что
+	\[
+	|d_{s,t} - \delta_{s,t}| \leq \frac{1}{8\pi(s+t)^2}\left(4 + \frac{32\pi}{3}\right) \leq \frac{2}{(s+t)^2}.
+	\]
+\end{proof}
+
+
+\begin{lemma}\label{lm:hatd}
+	Для всех  $s, t \in \{0, \dots, b^{k}-1\}$ верно неравенство 
+	\[
+	|\widehat{d}_{s,t} - d_{s,t}| \leq 2\pi b^{k-d} (2s+2t+4).
+	\]
+\end{lemma}
+\begin{proof}
+	Напомним, что \emph{формулой левых прямоугольников} для вычисления интеграла $\int_{x_i}^{x_{i+1}}\varphi(x)dx$ называется выражение $(x_{i+1}-x_i)\varphi(x_i)$, а составной формулой для сетки $\{x_0, \dots, x_n\}$ с шагом $h$ называется сумма
+	$
+	\sum_{i=0}^{n-1}\varphi(x_i)h.
+	$
+	Простая формула имеет погрешность 
+	\[
+	\left|\int_{x_i}^{x_{i+1}} \varphi(x) d x - \int_{x_i}^{x_{i+1}} \varphi(x_i) d x\right|
+	\le
+	\int_{x_i}^{x_{i+1}} \left|\varphi'\left(\xi(x)\right)\right|(x-x_i)d x
+	\le
+	\| \varphi ' \|_{C[x_i,x_{i+1}]} \cdot \frac{1}{2} (x_{i+1}-x_i)^2,
+	\]
+	где $\xi(x) \in [x_i,x_{i+1}]$.
+	При применении составной формулы на отрезке $[L,R]$ с шагом $h$ погрешность не превосходит $\| \varphi' \|_{C[L,R]} (R-L)h/2.$
+	
+	
+	Ясно видно, что выражение~(\ref{eq:d-hat}) для $\widehat{d}_{s,t}$ есть в точности составная формула левых прямоугольников для вычисления интеграла $d_{s,t}$ на отрезке $[0, 2\pi]$.
+	Погрешность аппроксимации интеграла оценивается так (подразумевается норма $\|\cdot\|_{C[0,2\pi]}$):
+	\begin{align*}
+	\left|\widehat{d}_{s,t}-d_{s,t}\right|
+	&\le
+	\left\| \frac{d}{d\xi} \left( \frac{1}{\pi} f_s\cdot f_t\right)\right\| 2\pi \frac{2 \pi}{2b^{d-k}}
+	=
+	2\pi b^{k-d} \left\| f_s'f_t+f_sf'_t\right\|
+	\leq \\ &\le
+	2\pi b^{k-d}\left( \| f_s'\| +  \| f_t'\| \right)
+	\le
+	2\pi b^{k-d} \left(2s+\frac{2\pi}{\pi}+2t +  \frac{2\pi}{\pi}\right)
+	=
+	2\pi b^{k-d} (2s+2t+4). 
+	\end{align*}
+	%
+\end{proof}
+\begin{lemma}\label{lm:F}
+	Пусть $F$ --- главная подматрица матрицы $\widehat{D}$, находящаяся на пересечении строк и столбцов с индексами $s,t \in [\ell, u)$,
+	где  $u :=\left\lfloor b^{\frac{d-k}{2}}/8\right\rfloor, \ell := \left\lceil b^{\frac{d-k}{2}}/16\right\rceil$, причём $b^{d-k} \geq 2^{10}$.
+	
+	Тогда младшее сингулярное число $\sigma_{\min}(F) > 1/2$.
+\end{lemma}
+\begin{proof}
+	Обратим внимание, что заявленное в начала раздела условие $k \geq d/3$ гарантирует, что $\ell, u < b^k$, поэтому выбирать подматрицу с указанными индексами в матрице $\widehat{D} \in \mathbb{R}^{b^k \times b^k}$ "--- корректно.
+	Обозначим $G = F - I$ и заметим, что
+	\begin{align} \label{eq:sigma-of-F}
+	\sigma_{\min}(F) 
+	&=
+	\sigma_{\min}(I + G)
+	=
+	\left\| (I+G)^{-1}\right\|_2^{-1}
+	=
+	\left\| I-G+G^2-G^3+\dots\right\|_2^{-1}
+	\geq \nonumber \\ &\ge
+	\left(\| I\|_2 + \| G\|_2+\| G\|_2^2+\dots\right)^{-1}
+	=
+	\left( \frac{1}{1-\| G \|}\right) ^{-1}
+	=
+	1 - \| G\|_2.
+	\end{align}
+	Из Лемм \ref{lm:d} и \ref{lm:hatd} следует, что все элементы матрицы $\widehat{D} - I$,
+	а значит, и $F - I$, по модулю не превосходят
+	\[
+	\frac{2}{(s+t)^2} + 2\pi b^{k-d}(2s + 2t + 4).
+	\]
+	Поэтому
+	\begin{align*}
+	\|G\|_2
+	&= \| F - I \|_2
+	\le
+	\| F - I \|_F
+	\le
+	(u-\ell) \|F-I\|_\infty \le (u-\ell)\left(\frac{2}{(s+t)^2} + 2\pi b^{k-d}(2s + 2t + 4)\right)
+	\leq \\ &\le
+	\frac{b^{\frac{d-k}{2}}}{16}\left(\frac{2}{4\ell^2} + \frac{2\pi\cdot 4u}{b^{d-k}}\right)
+	\le 
+	\frac{256}{32b^{\frac{d-k}{2}}} + \frac{8\pi}{128}.
+	\end{align*}
+	По условию $b^{d-k} \geq 2^{10}$, поэтому 
+	\[
+	\|G\|_2 \leq \frac{1}{4} + \frac{\pi}{16} < \frac{1}{2}.
+	\]
+	Отсюда и из неравенства (\ref{eq:sigma-of-F}) следует утверждение Леммы.
+\end{proof}
+
+\begin{theorem}\label{thm:lower}
+	Пусть $b \ge 2$, $d \ge 2$ и $k \ge d/3$ --- натуральные числа, удовлетворяющие условию  $b^{d-k} \geq 2^{10}$, а
+	$f(x) = \sin (2\pi b^{2k}x^2)$, $x \in[0,1]$.
+	Тогда верно неравенство
+	\[
+	\mathcal{R}_\varepsilon\left(T_{b,d,[0,1]}(f)\right) \geq \frac{1}{16}b^{\frac{d-k}{2}} - 2, ~\text{ где } \varepsilon = \frac{1}{2}b^{\frac{d-k}{2}}.
+	\]
+\end{theorem}
+\begin{proof}
+	Исследуем сингулярные числа $\sigma_s(A_k)$ матрицы $A_k$.
+	Для этого воспользуемся известным фактом, что 
+	\begin{equation}\label{eq:sigma-of-A}
+	\sigma_s(A_k) = \sqrt{\lambda_s(A_k^{\top}A_k)} = \sqrt{\sigma_s(A_k^{\top} A_k)}.
+	\end{equation}
+	Из определения (\ref{eq:d-hat}) матрицы $\widehat{D}$ следует, что 
+	$
+	A_k^{\top}A_k = 0.5\cdot b^{d-k}\widehat{D}. 		
+	$
+	%
+	Далее, для главной подматрицы $F$ матрицы $\widehat{D}$ из леммы \ref{lm:F} можно применить теорему о чередовании сингулярных чисел симметричной матрицы~\cite{MNA} и получить, что
+	$\sigma_{u-\ell}(\widehat{D}) \geq 0.5$.
+	Отсюда и из равенства (\ref{eq:sigma-of-A}) получаем
+	\[
+	\sigma_{u-\ell}(A_k) \geq \frac{1}{\sqrt{2}} b^{\frac{d-k}{2}} \sqrt{\sigma_{u-\ell}(\widehat{D})} > \frac{1}{2}b^{\frac{d-k}{2}}.
+	\]
+	
+	Рассмотрим теперь произвольный тензор $B$ со свойством $\|A - B\|_F \leq 0.5 b^{(d-k)/2}$.
+	Аналогичное неравенство верно и для матриц развёртки $A_k$ и $B_k$.
+	По теореме Эккарта--Юнга~\cite{Eckart1936} наилучшее приближение в норме Фробениуса ранга $u-\ell-1$ имеет погрешность как минимум (здесь $N := \min\{b^k, b^{d-k}\}$ "--- меньший из размеров матрицы $A_k$)
+	\[
+	\sqrt{\sigma_{u-\ell}^2(A_k) + \dots + \sigma_{N}^2(A_k)} \geq \sigma_{u-\ell}(A_k) > \frac{1}{2}b^{\frac{d-k}{2}},
+	\]
+	поэтому
+	\[
+	\rank B_k \geq u - \ell \geq \left(\frac{1}{8}b^{\frac{d-k}{2}} - 1\right) - \left(\frac{1}{16}b^{\frac{d-k}{2}} - 1\right) = \frac{1}{16}b^{\frac{d-k}{2}} - 2.
+	\]
+	Рассмотрим произвольное ТТ-разложение тензора $B$ вида (\ref{eq:TT}).
+	Для $k$-ой матрицы развёртки можно написать
+	\[
+	B_k(i_1, \dots, i_{k}; i_{k+1}, \dots, i_d) = \sum_{\alpha_k = 1}^{r_k} H'(i_1, \dots, i_k, \alpha_k) H''(\alpha_k, i_{k+1}, \dots, i_d),
+	\]
+	откуда следует, что $r_k \geq \rank B_k \geq \frac{1}{16}b^{\frac{d-k}{2}} - 2$, а в силу произвольности $B$ и
+	\[
+	\mathcal{R}_\varepsilon(A) \geq \frac{1}{16}b^{\frac{d-k}{2}} - 2.
+	\]
+\end{proof}
+Чтобы наглядно связать верхнюю оценку из данного раздела и нижние оценки из предыдущего, имеет смысл зафиксировать некоторые величины и перейти к асимптотической нотации.
+Именно, зафиксируем натуральное $b \geq 2$, произвольно малое $\varepsilon > 0$ и отрезок $[L, R]$ на вещественной прямой.
+Определим функцию
+\[
+\mathcal{R}_{b, \varepsilon, [L,R]}(M, d) = \max_{|f(z)| \leq M \text{ на } U}\mathcal{R}_\varepsilon(T_{b,d,[L,R]}(f)).
+\]
+Здесь максимум берётся по всем аналитическим в круге $U$ с диаметром $[L,R]$ функциям $f(z)$, имеющим вещественный след на $[L,R]$.
+
+Следствие~\ref{cor:upper} гарантирует оценку $\mathcal{R}_{b,\varepsilon, [L,R]}(M, d) = O(\ln M + d)$ при $M,d \to \infty$.
+С другой стороны, для функции $f(z)$ из данного раздела несложно оценить максимум модуля на единичном круге:
+\begin{equation}\label{eq:max-of-f}
+|f(z)| = \left|\sin(2\pi b^{2k}z^2)\right| = \left| \frac{1}{2i}\left(e^{2\pi i b^{2k}z^2} - e^{-2\pi i b^{2k}z^2}\right)\right| \leq e^{2\pi b^{2k}\left|z^2\right|} \leq e^{2\pi b^{2k}}.
+\end{equation}
+Пусть $k = \lceil d/3 \rceil$, тогда по Теореме \ref{thm:lower} максимальный ТТ-ранг есть как минимум
+\[
+\frac{1}{16}b^{\frac{d-k}{2}} - 2 = \Omega\left(b^k\right) = \Omega\left(\sqrt{\ln M(d)}\right) \text{ при } d \to \infty.
+\]
+В последнем равенстве за $M(d)$ обозначено число $e^{2\pi b^{2d/3}}$.
+Получается, что $\mathcal{R}_{b,\varepsilon, [L,R]}(M(d), d) = \Omega(\sqrt{\ln M(d)})$ при $d \to \infty$.
+
+\section{Применение к полиномам}
+В работе~\cite{Vysotsky2020} рассматривались ТТ-ранги приближений к тензоризациям полиномов.
+В данном разделе мы применим результаты предыдущих разделов к полиномам, существенно улучшив верхние оценки из указанной работы.
+Также мы получим нижние оценки ТТ-рангов $\varepsilon$-приближений для этого класса функций.
+
+\begin{proposition}
+	Пусть $p(x) = p_0 + p_1 x + \dots + p_n x^n$ "--- полином с вещественными коэффициентами.
+	Обозначим $A := T_{b,d,[0,1]}(f)$ и $M := \sum_{i=0}^n|p_i|$.
+	Зафиксируем произвольное $\varepsilon > 0$.
+	
+	Тогда для каждой матрицы развёртки $A_k$ тензора $A$, $k = 1, \dots, d-1$, и натурального $\mu \in [1, b^k - 1]$ существует матрица $B_k$ такая, что
+	\[
+	\rank B_k \leq 2\mu + s + 1 \text{ и } \| A_k - B_k \|_{\infty} \leq \varepsilon,
+	\]
+	где 
+	\[
+	s = \lfloor \log_{\rho} (3M /\varepsilon +1)\rfloor,~~\rho = 2\mu + 1+2 \sqrt{{\mu}^2+\mu}.
+	\]
+\end{proposition}
+\begin{proof}
+	Достаточно заметить, что на единичном круге на комплексной плоскости (а тем более в круге с диаметром $[0,1]$) аналитическое продолжение $p(z)$ полинома $p(x)$ ограничено по модулю суммой $\sum_i |p_i|$, и применить Теорему~\ref{thm:upper-1}.
+\end{proof}
+\begin{note*}
+	Если в духе работы~\cite{Vysotsky2020} ограничить коэффициенты $p_i$ по модулю фиксированной константой и поинтересоваться асимптотическим поведением $\varepsilon$-рангов матриц развёртки при стремлении $n$ к бесконечности, то доказанное утверждение даст оценку вида $O(\ln n)$ в отличии от оценки $O(\sqrt[3]{n})$, полученной в~\cite{Vysotsky2020}.
+\end{note*}
+
+\begin{proposition}
+	Пусть $b \ge 2$, $d \ge 2$ и $k \ge d/3$ --- натуральные числа, удовлетворяющие условию  $b^{d-k} \geq 2^{10}$.
+	
+	Тогда для любого $n \geq \lfloor\log_2(1 + 14b^{k/2}e^{10b^{2k}})\rfloor$ существует полином $P_n(x) = p_0 + \dots + p_nx^n$ такой, что:
+	\begin{enumerate}
+		\item $\sum_{i=0}^n|p_i| \leq 2^{2n}(n+1)^2$;
+		\item\label{prop:2}
+		$
+		\mathcal{R}_\varepsilon(T_{b,d,[0,1]}(P_n)) \geq \frac{1}{16}b^{\frac{d-k}{2}} - 2,~\text{ где }\varepsilon = \frac{1}{4}b^{\frac{d-k}{2}}.
+		$
+	\end{enumerate}
+\end{proposition}
+\begin{proof}
+	Возьмём функцию $f(x)$ из Теоремы~\ref{thm:lower}. Обозначим за $P_n(x)$ полином Лагранжа степени $n$, интерполирующий $f(x)$ на Чебышёвской сетке с $n+1$ узлом на $[-1,1]$.
+	Сначала оценим коэффициенты $p(x)$. 
+	Полином Лагранжа можно записать в следующем виде~\cite{MNA}:
+	\[
+	P_n(x) = \sum_{j=0}^{n} \frac{f(x_j)\omega(x)}{(x-x_j)\omega'(x_j)},~\omega(x) = (x - x_0)\dots(x-x_n),
+	\]
+	где $x_j$ суть корни полинома Чебышёва степени $n+1$, то есть 
+	\[
+	x_j = \cos\left(\frac{\pi}{2(n+1)} + \frac{\pi}{n+1}j\right),~~\omega(x) = 2^{-n}\cos((n+1)\arccos x).
+	\]
+	Оценим снизу модуль $\omega'(x_j)$:
+	\[
+	\omega'(x_j) = 2^{-n}(n+1)\frac{1}{\sqrt{1-x_j^2}}\sin\left((n+1)\arccos x_j\right) = \frac{2^{-n}(n+1)}{\sin\left(\frac{\pi}{2(n+1)} + \frac{\pi}{n+1}j\right)} \sin\left(\frac{\pi}{2} + \pi j\right).
+	\]
+	Поэтому $|\omega'(x_j)| \geq 2^{-n}(n+1)$.
+	Коэффициент при $x^m$ многочлена $\omega(x)/(x-x_j)$ есть, очевидно, 
+	\[
+	\sum_{\substack{0\leq j_1 < \dots < j_{n-m} \leq n \\ j_{\ell} \neq j}} (-1)^{n-m}x_{j_1}\dots x_{j_{n-m}},
+	\]
+	то есть по модулю не превосходит $C_n^{n-m}$.
+	Итого получаем
+	\[
+	\sum_{m=0}^n|p_m| \leq \sum_{j=0}^n\left|\frac{f(x_j)}{\omega'(x_j)}\right| \sum_{m=0}^nC_{n}^{n-m} \leq (n+1)2^n(n+1)2^n = 2^{2n}(n+1)^2.
+	\]
+	Применим Лемму~\ref{lm:lagrange} для оценки отклонения $f(x)$ от $P_n(x)$ на $[-1,1]$:
+	\[
+	|f(x) - P_n(x)| \leq \frac{M}{\rho^{n+1} - \rho^{-n-1}}\frac{\rho + \rho^{-1}}{\frac{1}{2}(\rho+ \rho^{-1}-1)},~~M :=  \max_{z\in\Gamma_\rho} |f(z)|.
+	\]
+	Положим $\rho := 2$ и оценим величину $M$, исходя из рассуждения, аналогичного (\ref{eq:max-of-f}): \[
+	M \leq e^{2\pi\left(\frac{\rho + \rho^{-1}}{2}\right)^2b^{2k}} \leq e^{10 b^{2k}}.
+	\]
+	Таким образом, с учётом определения неравенства (из условия) для $n$ для $x \in [-1,1]$ имеем
+	\[
+	|f(x) - P_n(x)| \leq \frac{e^{10b^{2k}}}{14b^{k/2}e^{10b^{2k}}} \frac{2.5}{0.75} \leq \frac{1}{4}b^{-k/2}.
+	\]
+	Это означает, что
+	\[
+	\|T_{b,d,[0,1]}(f) - T_{b,d,[0,1]}(P_n)\|_F \leq \frac{1}{4}b^{\frac{d-k}{2}} = \varepsilon.
+	\]
+	Теперь возьмём произвольный тензор $B$, приближающий $T_{b,d,[0,1]}(P_n)$ с ошибкой не более $\varepsilon$.
+	Заметим, что по неравенству треугольника для нормы он даёт приближение $T_{b,d,[0,1]}(f)$ с ошибкой не более $2\varepsilon$.
+	Из Теоремы~\ref{thm:lower} сразу получаем неравенство $\mathcal{R}(B) \geq \frac{1}{16}b^{\frac{d-k}{2}} - 2$, а в силу произвольности $B$ и свойство~\ref{prop:2} из условия.
+\end{proof}
+\section*{Благодарности}
+Автор выражает благодарность Высоцкой Виктории Владимировне за помощь в оформлении статьи.
+%Исследование выполнено при финансовой поддержке РФФИ,
+%проект No. 16-31-00494-мол\_а.
+
+%\section*{Список литературы}
+%\printacronyms[include-classes=abbrev,name=Abbreviations]
+\bibliographystyle{elsarticle-num-names}
+\bibliography{refs}
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
